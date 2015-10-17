@@ -34,7 +34,7 @@ button3_pin = 7 # pin for button to end the program, but not shutdown the pi
 
 post_online = 1 # default 1. Change to 0 if you don't want to upload pics.
 total_pics = 4 # number of pics to be taken
-capture_delay = 2 # delay between pics
+capture_delay = 4 # delay between pics
 prep_delay = 3 # number of seconds at step 1 as users prep to have photo taken
 gif_delay = 100 # How much time between frames in the animated gif
 restart_delay = 5 # how long to display finished message before beginning a new session
@@ -185,8 +185,10 @@ def start_photobooth():
 	camera = picamera.PiCamera()
 	pixel_width = 500 #use a smaller size to process faster, and tumblr will only take up to 500 pixels wide for animated gifs
 	pixel_height = monitor_h * pixel_width // monitor_w
-	camera.resolution = (pixel_width, pixel_height) 
+####	camera.resolution = (pixel_width, pixel_height) 
+        camera.resolution = (1280,720)
 	camera.vflip = True
+        camera.exposure_mode = 'auto'
 	camera.hflip = False
 ####	camera.saturation = -100 # comment out this line if you want color images
 	camera.start_preview()
@@ -221,13 +223,33 @@ def start_photobooth():
 		show_image(real_path + "/processing.png")
 
 	GPIO.output(led3_pin,True) #turn on the LED
+
 #	graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + config.file_path + now + "*.jpg " + config.file_path + now + ".gif"
 #	os.system(graphicsmagick) #make the .gif
+
+
 	print "Creating Montage"
 #	graphicsmagick = "gm montage " +  config.file_path + now + "*.jpg" + " -tile 2x2 -geometry +10+10 " + config.op_file_path + now + ".jpg"
 #	os.system(graphicsmagick) #make the montage
-	graphicsmagick = "gm montage " +  config.file_path + now + "*.jpg" + " -title \"" + config.pic_title + "\" -tile 2x2 -geometry +5+5 " + config.op_file_path + now + ".jpg"
+
+
+#	graphicsmagick = "gm montage " +  config.file_path + now + "*.jpg" + " -title \"" + config.pic_title + "\" -tile 2x2 -geometry +5+5 " + config.op_file_path + now + ".jpg"
+
+#### New Version
+        graphicsmagick = "convert " + config.backgndpic + " " + "\( " + config.file_path + now + "-01.jpg -resize 420x320 -frame 5 \) -geometry +10+10 -composite \( " + config.file_path + now + "-02.jpg -resize 420x320 -frame 5 \) -geometry +455+10 -composite \( " + config.file_path + now + "-03.jpg -resize 420x320 -frame 5 \) -geometry +10+330 -composite \( " + config.file_path + now + "-04.jpg -resize 420x320 -frame 5 \) -geometry +455+330 -composite " + config.op_file_path + now + ".jpg"
+
+
 	os.system(graphicsmagick) #make the montage
+
+##convert ../photobooth_background.png \
+##\( 2015-10-17-14:39:59-01.jpg -resize 420x320 -frame 5 \) -geometry +10+10 -composite \
+##\( 2015-10-17-14:39:59-02.jpg -resize 420x320 -frame 5 \) -geometry +455+10 -composite \
+##\( 2015-10-17-14:39:59-03.jpg -resize 420x320 -frame 5 \) -geometry +10+330 -composite \
+##\( 2015-10-17-14:39:59-04.jpg -resize 420x320 -frame 5 \) -geometry +455+330 -composite \
+##conv.jpg
+
+##gm montage " +  config.file_path + now + "*.jpg" + " -title \"" + config.pic_title + "\" -tile 2x2 -geometry +5+5 " + config.op_file_path + now + ".jpg"
+
 	############################### Step 3A ######################
 
 	print "Uploading to tumblr. Please check " + config.tumblr_blog + ".tumblr.com soon."
@@ -312,3 +334,4 @@ while True:
 
 
 ################## End #########################
+
